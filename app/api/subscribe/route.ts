@@ -21,37 +21,32 @@ async function addToKit(
     "Content-Type": "application/json",
   };
 
+  // Step 1: Create/update subscriber with name and source field
+  const subRes = await fetch("https://api.kit.com/v4/subscribers", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      email_address: email,
+      first_name: firstName || undefined,
+      fields: source ? { source } : undefined,
+    }),
+  });
+  if (!subRes.ok) {
+    const body = await subRes.text();
+    throw new Error(`Kit subscriber create failed ${subRes.status}: ${body}`);
+  }
+
   if (formId) {
-    // Add subscriber via form (preferred: tags/sequences automatically applied)
-    const res = await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
+    // Step 2: Add to form — this triggers Kit automations/sequences.
+    // Form endpoint only accepts email_address (name set in step 1).
+    const formRes = await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
       method: "POST",
       headers,
-      body: JSON.stringify({
-        email_address: email,
-        first_name: firstName || undefined,
-        fields: source ? { source } : undefined,
-      }),
+      body: JSON.stringify({ email_address: email }),
     });
-
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`Kit form subscribe failed ${res.status}: ${body}`);
-    }
-  } else {
-    // Fall back: create subscriber without a form
-    const res = await fetch("https://api.kit.com/v4/subscribers", {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        email_address: email,
-        first_name: firstName || undefined,
-        fields: source ? { source } : undefined,
-      }),
-    });
-
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`Kit subscriber create failed ${res.status}: ${body}`);
+    if (!formRes.ok) {
+      const body = await formRes.text();
+      throw new Error(`Kit form subscribe failed ${formRes.status}: ${body}`);
     }
   }
 
