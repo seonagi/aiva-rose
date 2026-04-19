@@ -9,6 +9,7 @@ async function addToKit(
 ): Promise<void> {
   const apiKey = process.env.KIT_API_KEY;
   const formId = process.env.KIT_FORM_ID;
+  const sequenceId = process.env.KIT_SEQUENCE_ID;
 
   if (!apiKey) {
     console.warn("[subscribe] KIT_API_KEY not set — skipping Kit integration");
@@ -36,9 +37,8 @@ async function addToKit(
     throw new Error(`Kit subscriber create failed ${subRes.status}: ${body}`);
   }
 
+  // Step 2: Add to form (records signup source)
   if (formId) {
-    // Step 2: Add to form — this triggers Kit automations/sequences.
-    // Form endpoint only accepts email_address (name set in step 1).
     const formRes = await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
       method: "POST",
       headers,
@@ -46,7 +46,20 @@ async function addToKit(
     });
     if (!formRes.ok) {
       const body = await formRes.text();
-      throw new Error(`Kit form subscribe failed ${formRes.status}: ${body}`);
+      console.warn(`Kit form subscribe failed ${formRes.status}: ${body}`);
+    }
+  }
+
+  // Step 3: Enroll in welcome sequence — delivers the bonus scene email
+  if (sequenceId) {
+    const seqRes = await fetch(`https://api.kit.com/v4/sequences/${sequenceId}/subscribers`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ email_address: email }),
+    });
+    if (!seqRes.ok) {
+      const body = await seqRes.text();
+      throw new Error(`Kit sequence enroll failed ${seqRes.status}: ${body}`);
     }
   }
 
