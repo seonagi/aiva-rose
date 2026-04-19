@@ -1,47 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
 
-/**
- * POST /api/subscribe
- *
- * Accepts: { name?: string, email: string, source?: string }
- *
- * Current behaviour: validates email is present, logs the submission, and
- * returns { success: true }.
- *
- * TODO: Wire in Mailchimp or ConvertKit here.
- *
- * Mailchimp integration sketch:
- *   const res = await fetch(
- *     `https://${DC}.api.mailchimp.com/3.0/lists/${LIST_ID}/members`,
- *     {
- *       method: "POST",
- *       headers: {
- *         Authorization: `apikey ${process.env.MAILCHIMP_API_KEY}`,
- *         "Content-Type": "application/json",
- *       },
- *       body: JSON.stringify({
- *         email_address: email,
- *         status: "subscribed",
- *         merge_fields: { FNAME: name },
- *         tags: [source].filter(Boolean),
- *       }),
- *     }
- *   );
- *
- * ConvertKit integration sketch:
- *   await fetch(`https://api.convertkit.com/v3/forms/${FORM_ID}/subscribe`, {
- *     method: "POST",
- *     headers: { "Content-Type": "application/json" },
- *     body: JSON.stringify({
- *       api_key: process.env.CONVERTKIT_API_KEY,
- *       email,
- *       first_name: name,
- *       tags: [source],
- *     }),
- *   });
- */
-
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+async function addToKit(
+  email: string,
+  firstName: string,
+  source: string
+): Promise<void> {
+  const apiKey = process.env.KIT_API_KEY;
+  const formId = process.env.KIT_FORM_ID;
+
+  if (!apiKey) {
+    console.warn("[subscribe] KIT_API_KEY not set — skipping Kit integration");
+    return;
+  }
+
+  const headers = {
+    Authorization: `Bearer ${apiKey}`,
+    "Content-Type": "application/json",
+  };
+
+  if (formId) {
+    // Add subscriber via form (preferred: tags/sequences automatically applied)
+    const res = await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        email_address: email,
+        first_name: firstName || undefined,
+        fields: source ? { source } : undefined,
+      }),
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Kit form subscribe failed ${res.status}: ${body}`);
+    }
+  } else {
+    // Fall back: create subscriber without a form
+    const res = await fetch("https://api.kit.com/v4/subscribers", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        email_address: email,
+        first_name: firstName || undefined,
+        fields: source ? { source } : undefined,
+      }),
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Kit subscriber create failed ${res.status}: ${body}`);
+    }
+  }
+
+  console.log(`[subscribe] added to Kit: ${email}`);
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -81,8 +95,14 @@ export async function POST(req: NextRequest) {
       receivedAt: new Date().toISOString(),
     };
 
-    // For now: log. Swap this for Mailchimp/ConvertKit call (see header comment).
     console.log("[subscribe] new submission:", submission);
+
+    try {
+      await addToKit(submission.email, submission.name, submission.source);
+    } catch (kitErr) {
+      // Don't fail the user-facing request if Kit is having a bad day
+      console.error("[subscribe] Kit error (non-fatal):", kitErr);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {
