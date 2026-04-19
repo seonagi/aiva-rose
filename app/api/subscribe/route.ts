@@ -15,8 +15,9 @@ async function addToKit(
     return;
   }
 
+  // Kit API keys use X-Kit-Api-Key header (not Bearer token)
   const headers = {
-    Authorization: `Bearer ${apiKey}`,
+    "X-Kit-Api-Key": apiKey,
     "Content-Type": "application/json",
   };
 
