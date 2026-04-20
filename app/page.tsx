@@ -182,7 +182,7 @@ export default function HomePage() {
             <SubscribeForm
               source="home"
               submitLabel="Join the list"
-              successMessage="You're on the list. Welcome to the family. Your bonus scene is on its way — if it doesn't arrive in a few minutes, check your spam folder."
+              successMessage="You're on the list. Welcome to the family. Your bonus scene will arrive within the hour — if it doesn't show up, check your spam folder."
             />
           </div>
         </div>
