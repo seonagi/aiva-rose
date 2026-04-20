@@ -142,23 +142,36 @@ export default function HomePage() {
 
       {/* Author bio */}
       <section className="py-20 sm:py-24 bg-ink-soft/60">
-        <div className="mx-auto max-w-2xl px-6 text-center">
-          <p className="text-xs uppercase tracking-[0.35em] text-gold/80">
-            About
-          </p>
-          <h2 className="mt-3 font-serif text-4xl sm:text-5xl text-parchment">
-            The Author
-          </h2>
-          <div className="mx-auto mt-6 h-px w-16 bg-gold/40" />
-          <p className="mt-8 text-lg text-parchment/80 leading-relaxed">
-            Aiva Rose writes dark romance about dangerous men and the women who
-            are more dangerous still. Her characters are morally complicated,
-            her love stories are hard-won, and her heroines never wait to be
-            rescued.
-          </p>
-          <p className="mt-4 text-lg text-parchment/80 leading-relaxed">
-            She lives in Europe and drinks too much coffee.
-          </p>
+        <div className="mx-auto max-w-4xl px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_2fr] gap-12 items-center">
+            <div className="flex justify-center sm:justify-end">
+              <Image
+                src="/images/aiva-rose-author.jpg"
+                alt="Aiva Rose, author"
+                width={280}
+                height={400}
+                className="rounded-sm shadow-xl object-cover"
+              />
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-gold/80">
+                About
+              </p>
+              <h2 className="mt-3 font-serif text-4xl sm:text-5xl text-parchment">
+                Aiva Rose
+              </h2>
+              <div className="mt-6 h-px w-16 bg-gold/40" />
+              <p className="mt-8 text-lg text-parchment/80 leading-relaxed">
+                Aiva Rose writes dark romance about dangerous men and the women
+                who are more dangerous still. Her characters are morally
+                complicated, her love stories are hard-won, and her heroines
+                never wait to be rescued.
+              </p>
+              <p className="mt-4 text-lg text-parchment/80 leading-relaxed">
+                She lives in Europe and drinks too much coffee.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
