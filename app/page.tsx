@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import SubscribeForm from "@/components/SubscribeForm";
 import Footer from "@/components/Footer";
 
@@ -7,6 +8,7 @@ interface Book {
   title: string;
   hook: string;
   amazonUrl: string;
+  cover: string;
 }
 
 const books: Book[] = [
@@ -15,30 +17,35 @@ const books: Book[] = [
     title: "Bound by Betrayal",
     hook: "She came to audit his empire. She didn't plan on becoming part of it.",
     amazonUrl: "#",
+    cover: "/images/book-1.jpg",
   },
   {
     number: 2,
     title: "Bound by Shadows",
     hook: "The contract said one year. Neither of them planned on more.",
     amazonUrl: "#",
+    cover: "/images/book-2.jpg",
   },
   {
     number: 3,
     title: "Bound by Secrets",
     hook: "Someone inside the family is a traitor. She's the only one he trusts to find them.",
     amazonUrl: "#",
+    cover: "/images/book-3.jpg",
   },
   {
     number: 4,
     title: "Bound by Blood",
     hook: "She has the map that could bring down a senator. And one secret that could bring down her marriage.",
     amazonUrl: "#",
+    cover: "/images/book-4.jpg",
   },
   {
     number: 5,
     title: "Bound by Forever",
     hook: "The life she chose was built for her. Now she has to decide what to do with that.",
     amazonUrl: "#",
+    cover: "/images/book-5.jpg",
   },
 ];
 
@@ -100,15 +107,22 @@ export default function HomePage() {
                 key={book.number}
                 className="group grid grid-cols-[auto_1fr] gap-6 sm:gap-8 border-b border-white/5 pb-10 last:border-b-0 animate-fade-in-slow"
               >
-                <div className="pt-1">
-                  <span className="font-serif text-5xl sm:text-6xl text-gold/70 group-hover:text-gold transition-colors">
-                    {String(book.number).padStart(2, "0")}
-                  </span>
+                <div className="flex-shrink-0">
+                  <Image
+                    src={book.cover}
+                    alt={`${book.title} cover`}
+                    width={90}
+                    height={135}
+                    className="rounded-sm shadow-lg object-cover group-hover:opacity-90 transition-opacity"
+                  />
                 </div>
-                <div>
+                <div className="pt-1">
                   <h3 className="font-serif text-2xl sm:text-3xl text-parchment">
                     {book.title}
                   </h3>
+                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-gold/60">
+                    Book {book.number}
+                  </p>
                   <p className="mt-3 text-parchment/75 sm:text-lg italic font-serif">
                     {book.hook}
                   </p>
@@ -168,7 +182,7 @@ export default function HomePage() {
             <SubscribeForm
               source="home"
               submitLabel="Join the list"
-              successMessage="You're on the list. Welcome to the family."
+              successMessage="You're on the list. Welcome to the family. Your bonus scene is on its way — if it doesn't arrive in a few minutes, check your spam folder."
             />
           </div>
         </div>
